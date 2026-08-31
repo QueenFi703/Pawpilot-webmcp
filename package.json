@@ -1,0 +1,21 @@
+{
+  "name": "pawpilot-webmcp",
+  "version": "0.1.0",
+  "description": "An agent-ready pet care demo built for the WebMCP hackathon",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.50.0",
+    "eslint-config-next": "^14.0.0"
+  }
+}

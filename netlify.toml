@@ -1,0 +1,6 @@
+[build]
+  command = "npm ci --ignore-scripts --no-audit --no-fund && npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
