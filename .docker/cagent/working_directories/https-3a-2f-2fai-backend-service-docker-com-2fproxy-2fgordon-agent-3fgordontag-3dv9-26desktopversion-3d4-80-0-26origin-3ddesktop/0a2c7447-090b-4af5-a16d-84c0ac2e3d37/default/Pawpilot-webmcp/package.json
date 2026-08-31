@@ -1,0 +1,40 @@
+{
+  "name": "pawpilot-webmcp",
+  "version": "2.0.0",
+  "description": "PawPilot: AI-powered agentic pet care orchestration via WebMCP",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"tsx watch src/server.ts\" \"vite\"",
+    "dev:server": "tsx watch src/server.ts",
+    "dev:client": "vite",
+    "build": "tsc && vite build && cp build/server.js dist/ && rm -rf build",
+    "preview": "vite preview",
+    "start": "node dist/server.js",
+    "type-check": "tsc --noEmit",
+    "db:migrate": "node scripts/migrate.js",
+    "db:seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "openai": "^4.20.0",
+    "pg": "^8.11.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.10.9",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
+    "terser": "^5.27.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.7"
+  }
+}
