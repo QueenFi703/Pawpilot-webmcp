@@ -79,6 +79,16 @@
   color: #333;
 }
 
+.errorMessage {
+  margin: -0.5rem 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #efb8bd;
+  border-radius: 8px;
+  background: #fff1f2;
+  color: #8a2430;
+  font-weight: 600;
+}
+
 .goalForm form {
   display: flex;
   gap: 0.5rem;
@@ -171,6 +181,16 @@
 .status {
   background: #fff3cd;
   color: #856404;
+}
+
+.status.completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status.failed {
+  background: #f8d7da;
+  color: #721c24;
 }
 
 .toolList {

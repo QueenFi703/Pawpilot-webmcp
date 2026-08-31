@@ -3,10 +3,10 @@ import styles from '../styles/Home.module.css';
 
 export default function Home() {
   const [petProfile, setPetProfile] = useState(null);
-  const [dailyNeeds, setDailyNeeds] = useState(null);
   const [toolCalls, setToolCalls] = useState([]);
   const [userGoal, setUserGoal] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pageError, setPageError] = useState('');
 
   useEffect(() => {
     loadPetProfile();
@@ -14,21 +14,32 @@ export default function Home() {
 
   const loadPetProfile = async () => {
     try {
-      const response = await fetch('/api/execute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tool: 'get_pet_profile',
-          params: { petId: 'milo-001' }
-        })
-      });
-      const result = await response.json();
+      const result = await runTool('get_pet_profile', { petId: 'milo-001' });
       if (result.success) {
         setPetProfile(result.data);
+        setPageError('');
+      } else {
+        setPageError(result.error || 'Unable to load the pet profile.');
       }
     } catch (error) {
       console.error('Error loading pet profile:', error);
+      setPageError('Unable to connect to the PawPilot API.');
     }
+  };
+
+  const runTool = async (tool, params) => {
+    const response = await fetch('/api/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tool, params })
+    });
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || `Tool request failed with ${response.status}`);
+    }
+
+    return result;
   };
 
   const handleGoalSubmit = async (e) => {
@@ -42,7 +53,7 @@ export default function Home() {
       status: 'processing',
       tools: []
     };
-    setToolCalls([...toolCalls, newToolCall]);
+    setToolCalls(prev => [...prev, newToolCall]);
 
     try {
       // Simulate agent workflow: get profile -> get needs -> find services
@@ -59,14 +70,12 @@ export default function Home() {
       { name: 'find_pet_services', params: { serviceType: 'grooming' } }
     ];
 
+    let hasErrors = false;
+
     for (const tool of tools) {
       try {
-        const response = await fetch('/api/execute', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(tool)
-        });
-        const result = await response.json();
+        const result = await runTool(tool.name, tool.params);
+        hasErrors = hasErrors || !result.success;
 
         setToolCalls(prev =>
           prev.map(call =>
@@ -87,12 +96,32 @@ export default function Home() {
         );
       } catch (error) {
         console.error(`Error executing tool ${tool.name}:`, error);
+        hasErrors = true;
+        setToolCalls(prev =>
+          prev.map(call =>
+            call.id === callId
+              ? {
+                  ...call,
+                  tools: [
+                    ...call.tools,
+                    {
+                      name: tool.name,
+                      status: 'error',
+                      result: { success: false, error: error.message }
+                    }
+                  ]
+                }
+              : call
+          )
+        );
       }
     }
 
     setToolCalls(prev =>
       prev.map(call =>
-        call.id === callId ? { ...call, status: 'completed' } : call
+        call.id === callId
+          ? { ...call, status: hasErrors ? 'failed' : 'completed' }
+          : call
       )
     );
   };
@@ -127,6 +156,7 @@ export default function Home() {
 
       <section className={styles.goalForm}>
         <h2>What does Milo need today?</h2>
+        {pageError && <p className={styles.errorMessage}>{pageError}</p>}
         <form onSubmit={handleGoalSubmit}>
           <input
             type="text"
@@ -148,7 +178,11 @@ export default function Home() {
             <div key={call.id} className={styles.toolCall}>
               <div className={styles.callHeader}>
                 <h3>Goal: {call.goal}</h3>
-                <span className={styles.status}>{call.status}</span>
+                <span
+                  className={`${styles.status} ${styles[call.status]}`}
+                >
+                  {call.status}
+                </span>
               </div>
               <div className={styles.toolList}>
                 {call.tools.map((tool, idx) => (
