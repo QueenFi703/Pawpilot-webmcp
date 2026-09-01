@@ -7,10 +7,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { tool, params } = req.body || {};
+    const body = req.body || {};
+    const tool = body.tool || body.name;
+    const params = body.params ?? body.arguments ?? body.input ?? {};
 
-    if (typeof tool !== 'string' || !params) {
-      return res.status(400).json({ success: false, error: 'tool and params are required' });
+    if (typeof tool !== 'string') {
+      return res.status(400).json({ success: false, error: 'tool is required' });
     }
 
     const result = await executeTool(tool, params);

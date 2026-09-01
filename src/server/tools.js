@@ -2,28 +2,29 @@ import { desc, eq } from 'drizzle-orm';
 import { db } from '../../db/index';
 import { carePlans } from '../../db/schema';
 import { miloProfile, dailyNeeds, petServices, petProducts } from '../data/pets.js';
+import { DEFAULT_PET_ID, getToday, normalizeToolParams } from '../shared/tool-input.js';
 
 const petIdSchema = {
   type: 'string',
   description: 'Stable pet identifier. Milo is milo-001.',
-  minLength: 1
+  minLength: 1,
+  default: DEFAULT_PET_ID
 };
 
 export const tools = [
   {
     name: 'get_pet_profile',
-    description: 'Retrieve a pet profile, including medical notes, allergies, and preferences.',
+    description: 'Retrieve Milo’s pet profile, including medical notes, allergies, and preferences. petId defaults to milo-001.',
     inputSchema: {
       type: 'object',
       properties: { petId: petIdSchema },
-      required: ['petId'],
       additionalProperties: false
     },
     annotations: { readOnlyHint: true, openWorldHint: false }
   },
   {
     name: 'get_daily_needs',
-    description: 'Get the care checklist for a pet on a specific date.',
+    description: 'Get Milo’s care checklist. petId defaults to milo-001 and date defaults to today.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -31,10 +32,10 @@ export const tools = [
         date: {
           type: 'string',
           description: 'Date in YYYY-MM-DD format. Defaults to today.',
-          pattern: '^\\d{4}-\\d{2}-\\d{2}$'
+          pattern: '^\\d{4}-\\d{2}-\\d{2}$',
+          default: getToday()
         }
       },
-      required: ['petId'],
       additionalProperties: false
     },
     annotations: { readOnlyHint: true, openWorldHint: false }
@@ -90,7 +91,7 @@ export const tools = [
           additionalProperties: false
         }
       },
-      required: ['petId', 'plan'],
+      required: ['plan'],
       additionalProperties: false
     },
     annotations: {
@@ -102,11 +103,10 @@ export const tools = [
   },
   {
     name: 'list_care_plans',
-    description: 'List saved care plans for a pet, newest first.',
+    description: 'List Milo’s saved care plans, newest first. petId defaults to milo-001.',
     inputSchema: {
       type: 'object',
       properties: { petId: petIdSchema },
-      required: ['petId'],
       additionalProperties: false
     },
     annotations: { readOnlyHint: true, openWorldHint: false }
@@ -167,7 +167,13 @@ function validateParams(toolName, params) {
 
 export class ToolInputError extends Error {}
 
-export async function executeTool(toolName, params) {
+export async function executeTool(toolName, rawParams) {
+  let params;
+  try {
+    params = normalizeToolParams(toolName, rawParams);
+  } catch {
+    throw new ToolInputError('Tool arguments must be valid JSON');
+  }
   validateParams(toolName, params);
 
   switch (toolName) {

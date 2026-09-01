@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { registerPawpilotTools } from '../client/webmcp.js';
+import { DEFAULT_PET_ID, normalizeToolParams } from '../shared/tool-input.js';
 import styles from '../styles/Home.module.css';
 
-const PET_ID = 'milo-001';
+const PET_ID = DEFAULT_PET_ID;
 
 async function callTool(tool, params) {
+  const normalizedParams = normalizeToolParams(tool, params);
   const response = await fetch('/api/execute', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tool, params })
+    body: JSON.stringify({ tool, params: normalizedParams })
   });
   const result = await response.json();
   if (!response.ok || !result.success) throw new Error(result.error || `${tool} failed`);

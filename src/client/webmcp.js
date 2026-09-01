@@ -1,3 +1,5 @@
+import { normalizeToolParams } from '../shared/tool-input.js';
+
 const toToolResult = (data) => ({
   content: [
     {
@@ -32,7 +34,8 @@ export async function registerPawpilotTools(onActivity) {
       description: tool.description,
       inputSchema: tool.inputSchema,
       annotations: tool.annotations,
-      execute: async (params) => {
+      execute: async (rawParams) => {
+        const params = normalizeToolParams(tool.name, rawParams);
         const callId = `${tool.name}-${Date.now()}`;
         onActivity?.({ callId, name: tool.name, status: 'running', params });
 

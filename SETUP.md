@@ -76,6 +76,8 @@ Browsers without WebMCP support can still discover and execute the tools through
 - `GET /api/tools` - Discover available tools and their JSON input schemas
 - `POST /api/execute` - Execute a tool with parameters
 
+Pet-context tools default to Milo (`milo-001`), and `get_daily_needs` defaults to the current date. This keeps Microsoft Edge WebMCP calls valid when the browser invokes a tool with an empty argument object. The execution endpoint also accepts `pet_id`, JSON-string arguments, and `{ name, arguments }` request envelopes before normalizing them to the canonical tool input.
+
 ### Example Tool Call
 
 ```javascript
