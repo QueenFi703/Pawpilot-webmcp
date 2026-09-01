@@ -1,13 +1,28 @@
 {
   "name": "pawpilot-webmcp",
   "version": "0.1.0",
-  "description": "An agent-ready pet care demo built for the WebMCP hackathon",
+  "description": "An Edge-compatible WebMCP pet care workspace with persistent Netlify care plans",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Queenfi703/Petpilot-webmcp.git"
+  },
+  "keywords": [
+    "webmcp",
+    "netlify",
+    "nextjs",
+    "agents",
+    "pet-care"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@netlify/database": "^2.0.0",

@@ -1,142 +1,108 @@
 # PawPilot Development Setup
 
-## Quick Start
+## Requirements
 
-### Prerequisites
-- Node.js 16+ installed
-- npm or yarn package manager
+- Node.js 22 or newer
+- npm
+- Netlify CLI when testing Netlify Database locally
 
-### Installation
+## Install
 
 ```bash
-# Clone or navigate to the repository
-cd Pawpilot-webmcp
-
-# Install dependencies
 npm install
-
-# Start the development server
-npm run dev
 ```
 
-The app will be available at: **http://localhost:3000/**
+## Run Locally
 
-### Development Commands
+Use Netlify Dev for the complete application environment:
 
 ```bash
-# Start dev server with auto-reload
+netlify dev --port 8889
+```
+
+Open `http://localhost:8889`.
+
+For frontend-only work:
+
+```bash
 npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Run linting
-npm run lint
 ```
 
-## Project Structure
+Open `http://localhost:3000`.
 
-```
-src/
-├── pages/                   # Next.js pages and API routes
-│   ├── index.js            # Main UI page
-│   ├── _app.js             # App wrapper
-│   └── api/
-│       ├── tools.js        # Tool discovery endpoint
-│       └── execute.js      # Tool execution endpoint
-├── server/
-│   └── tools.js            # WebMCP tool definitions & implementations
-├── data/
-│   └── pets.js             # Mock pet data (Milo's profile, services, products)
-└── styles/
-    ├── globals.css         # Global styles
-    └── Home.module.css     # Page-specific styles
+## Commands
+
+```bash
+npm run dev          # Start Next.js development mode
+npm run lint         # Run Next.js linting
+npm run build        # Create a production build
+npm run start        # Serve a production build
+npm run db:generate  # Generate a database migration
 ```
 
-## WebMCP Integration
+## WebMCP Checks
 
-PawPilot registers its tool catalog with `document.modelContext` when the page opens in a WebMCP-capable browser. Agent calls execute through the same validated server handlers used by the dashboard, and calls appear live in the WebMCP activity panel.
-
-Browsers without WebMCP support can still discover and execute the tools through the HTTP endpoints below.
-
-### Available Tools
-
-1. **get_pet_profile** - Retrieve Milo's profile with medical history
-2. **get_daily_needs** - Get today's care checklist
-3. **find_pet_services** - Find veterinary, grooming, training, or boarding services
-4. **find_pet_products** - Find pet food, treats, toys, or bedding
-5. **save_care_plan** - Save a generated care plan
-6. **list_care_plans** - List persisted care plans for a pet
-
-### API Endpoints
-
-- `GET /api/tools` - Discover available tools and their JSON input schemas
-- `POST /api/execute` - Execute a tool with parameters
-
-Pet-context tools default to Milo (`milo-001`), and `get_daily_needs` defaults to the current date. This keeps Microsoft Edge WebMCP calls valid when the browser invokes a tool with an empty argument object. The execution endpoint also accepts `pet_id`, JSON-string arguments, and `{ name, arguments }` request envelopes before normalizing them to the canonical tool input.
-
-### Example Tool Call
+In Microsoft Edge DevTools, confirm that the browser model context and tools are available:
 
 ```javascript
-const response = await fetch('/api/execute', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    tool: 'get_pet_profile',
-    params: { petId: 'milo-001' }
-  })
-});
-const result = await response.json();
-console.log(result);
+typeof document.modelContext;
+await document.modelContext.getTools();
 ```
 
-## Environment Variables
+Test the daily-needs tool with the empty argument shape produced by Edge:
 
-Create a `.env.local` file for local development (copy from `.env.example`):
-
+```javascript
+const tools = await document.modelContext.getTools();
+const tool = tools.find((candidate) => candidate.name === 'get_daily_needs');
+await document.modelContext.executeTool(tool, '{}');
 ```
-NEXT_PUBLIC_API_URL=http://localhost:3000
-NODE_ENV=development
+
+PawPilot fills in `petId: "milo-001"` and the current date before calling `/api/execute`.
+
+## API Checks
+
+Discover tools:
+
+```bash
+curl http://localhost:8889/api/tools
 ```
 
-## Agent Flow
+Execute a tool with inferred pet context:
 
-1. Open PawPilot in a browser with WebMCP support.
-2. The page registers all six tools with the browser's model context.
-3. A connected agent chooses and calls tools based on the user's request.
-4. PawPilot displays each incoming call and its status in real time.
-5. Read tools return pet context without side effects.
-6. The agent calls `save_care_plan` only after explicit user approval.
-7. Saved plans persist in Netlify Database and can be retrieved with `list_care_plans`.
+```bash
+curl --request POST http://localhost:8889/api/execute \
+  --header 'Content-Type: application/json' \
+  --data '{"tool":"get_daily_needs","params":{}}'
+```
+
+The endpoint accepts canonical `{ tool, params }` requests as well as `{ name, arguments }`, JSON-string arguments, `pet_id`, and `service_type`.
+
+## Database Changes
+
+Define schema changes in `db/schema.ts`, then generate a named migration:
+
+```bash
+npm run db:generate -- --name add_descriptive_change
+```
+
+Commit both the schema change and the generated files in `netlify/database/migrations/`. Netlify applies migrations during deployment.
 
 ## Troubleshooting
 
-### Port 3000 already in use
+### Port already in use
+
+Use the required Netlify development port after stopping the process currently using it:
 
 ```bash
-# Use a different port
-npm run dev -- -p 3001
+netlify dev --port 8889
 ```
 
-### Dependencies not installing
+### WebMCP tools are unavailable
 
-```bash
-# Clear npm cache and reinstall
-rm -rf node_modules package-lock.json
-npm install
-```
+- Confirm the site is open in a Microsoft Edge environment with WebMCP support.
+- Reload after opening DevTools or enabling the relevant browser capability.
+- Check `GET /api/tools` to separate browser registration issues from server tool issues.
 
-### Changes not reflecting
+### A tool returns 400
 
-```bash
-# Clear Next.js cache
-rm -rf .next
-npm run dev
-```
-
-## Data Storage
-
-Care plans use Netlify Database with the schema in `db/schema.ts`. Migrations in `netlify/database/migrations/` are applied automatically during deploy.
+Inspect the JSON error returned by `/api/execute`. Pet context and the daily date are inferred, but service type, product category, and care-plan content remain intentionally required.
