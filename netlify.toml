@@ -4,3 +4,11 @@
 
 [build.environment]
   NODE_VERSION = "22"
+
+# Use Netlify's Next.js runtime so pages and /api routes are deployed correctly.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Keep Lighthouse auditing enabled for the deployed preview.
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
