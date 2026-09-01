@@ -14,6 +14,10 @@ const quickPrompts = [
 
 export default function Home() {
   const [petProfile, setPetProfile] = useState(null);
+  const [toolCalls, setToolCalls] = useState([]);
+  const [userGoal, setUserGoal] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [pageError, setPageError] = useState('');
   const [dailyNeeds, setDailyNeeds] = useState(null);
   const [messages, setMessages] = useState([
     { id: 'welcome', role: 'assistant', text: "Hi — I'm PawPilot. Ask me anything about Dojo, or use one of the quick actions below." },
@@ -123,6 +127,37 @@ export default function Home() {
     setUserGoal('');
     setLoading(true);
     try {
+      const result = await runTool('get_pet_profile', { petId: 'milo-001' });
+      if (result.success) {
+        setPetProfile(result.data);
+        setPageError('');
+      } else {
+        setPageError(result.error || 'Unable to load the pet profile.');
+      }
+    } catch (error) {
+      console.error('Error loading pet profile:', error);
+      setPageError('Unable to connect to the PawPilot API.');
+    }
+  };
+
+  const runTool = async (tool, params) => {
+    const response = await fetch('/api/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tool, params })
+    });
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || `Tool request failed with ${response.status}`);
+    }
+
+    return result;
+  };
+
+  const handleGoalSubmit = async (e) => {
+    e.preventDefault();
+    if (!userGoal.trim()) return;
       const response = await fetch('/api/agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -149,6 +184,14 @@ export default function Home() {
   async function confirmSavePlan() {
     if (!pendingPlan) return;
     setLoading(true);
+    const newToolCall = {
+      id: Date.now(),
+      goal: userGoal,
+      status: 'processing',
+      tools: []
+    };
+    setToolCalls(prev => [...prev, newToolCall]);
+
     try {
       const result = await executeNamedTool('save_care_plan', { petId: pendingPlan.petId, plan: pendingPlan.plan, confirmed: true });
       setPendingPlan(null);
