@@ -1,7 +1,7 @@
-.container {
-  max-width: 1000px;
+.shell {
+  width: min(1180px, calc(100% - 40px));
   margin: 0 auto;
-  padding: 2rem;
+  padding: 46px 0 72px;
 }
 
 .header {
@@ -73,7 +73,7 @@
   color: #252525;
 }
 
-.profileGrid {
+.dashboard {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 0.85rem;
@@ -238,6 +238,7 @@
 .confirmPanel {
   display: flex;
   justify-content: space-between;
+  gap: 18px;
   align-items: center;
   gap: 1rem;
   border: 2px solid #667eea;
@@ -281,6 +282,7 @@
 
 .callHeader {
   display: flex;
+  min-height: 126px;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
