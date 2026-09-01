@@ -4,3 +4,5 @@
 
 [build.environment]
   NODE_VERSION = "22"
+
+# Rebuild trigger: lockfile/dependency state has been corrected.
