@@ -3,6 +3,7 @@ import { executeTool } from '../../server/tools.js';
 const PET_ID = 'dojo-001';
 const OPENAI_URL = 'https://api.openai.com/v1/responses';
 const MODEL = process.env.OPENAI_MODEL || 'gpt-5.6-luna';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_PawPilot;
 
 const tools = [
   { type: 'function', name: 'get_pet_profile', description: 'Retrieve the current pet profile.', parameters: { type: 'object', properties: { petId: { type: 'string' } }, required: ['petId'], additionalProperties: false }, strict: true },
@@ -15,13 +16,18 @@ const tools = [
 const instructions = `You are PawPilot, a calm and practical pet-care assistant.\n- Answer naturally and concisely.\n- Use tools when the request needs PawPilot data or an action.\n- The current demo pet is ${PET_ID}. If the user says my dog or my pet without another identity, use ${PET_ID}.\n- Never invent pet, service, or product facts.\n- Never save a care plan unless confirmed=true.\n- If saving has not been explicitly confirmed, propose the plan and ask for confirmation.`;
 
 async function callOpenAI(input) {
+  if (!OPENAI_API_KEY) throw new Error('PawPilot OpenAI credential is not configured on Netlify. Add a valid OpenAI API key as OPENAI_API_KEY_PawPilot.');
   const response = await fetch(OPENAI_URL, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ model: MODEL, instructions, input, tools, tool_choice: 'auto', store: false })
   });
   const payload = await response.json();
-  if (!response.ok) throw new Error(payload?.error?.message || `OpenAI request failed (${response.status})`);
+  if (!response.ok) {
+    const apiMessage = payload?.error?.message || `OpenAI request failed (${response.status})`;
+    if (response.status === 401) throw new Error(`PawPilot could not authenticate with OpenAI. The Netlify OpenAI credential is invalid or is not an OpenAI API key. ${apiMessage}`);
+    throw new Error(apiMessage);
+  }
   return payload;
 }
 
@@ -37,7 +43,7 @@ function responseText(response) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  if (!process.env.OPENAI_API_KEY) return res.status(500).json({ error: 'OPENAI_API_KEY is not configured on the server.' });
+  if (!OPENAI_API_KEY) return res.status(500).json({ error: 'PawPilot OpenAI credential is not configured on Netlify. Add a valid OpenAI API key as OPENAI_API_KEY_PawPilot.' });
 
   try {
     const { message, history = [] } = req.body || {};
