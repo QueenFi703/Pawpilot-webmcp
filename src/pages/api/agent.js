@@ -3,7 +3,7 @@ import { executeTool } from '../../server/tools.js';
 const PET_ID = 'dojo-001';
 const OPENAI_URL = 'https://api.openai.com/v1/responses';
 const MODEL = process.env.OPENAI_MODEL || 'gpt-5.6-luna';
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_PawPilot;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY_PawPilot;
 
 const tools = [
   { type: 'function', name: 'get_pet_profile', description: 'Retrieve the current pet profile.', parameters: { type: 'object', properties: { petId: { type: 'string' } }, required: ['petId'], additionalProperties: false }, strict: true },
