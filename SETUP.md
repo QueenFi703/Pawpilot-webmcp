@@ -58,6 +58,10 @@ src/
 
 ## WebMCP Integration
 
+PawPilot registers its tool catalog with `document.modelContext` when the page opens in a WebMCP-capable browser. Agent calls execute through the same validated server handlers used by the dashboard, and calls appear live in the WebMCP activity panel.
+
+Browsers without WebMCP support can still discover and execute the tools through the HTTP endpoints below.
+
 ### Available Tools
 
 1. **get_pet_profile** - Retrieve Milo's profile with medical history
@@ -65,10 +69,11 @@ src/
 3. **find_pet_services** - Find veterinary, grooming, training, or boarding services
 4. **find_pet_products** - Find pet food, treats, toys, or bedding
 5. **save_care_plan** - Save a generated care plan
+6. **list_care_plans** - List persisted care plans for a pet
 
 ### API Endpoints
 
-- `GET /api/tools` - Discover available tools
+- `GET /api/tools` - Discover available tools and their JSON input schemas
 - `POST /api/execute` - Execute a tool with parameters
 
 ### Example Tool Call
@@ -95,18 +100,15 @@ NEXT_PUBLIC_API_URL=http://localhost:3000
 NODE_ENV=development
 ```
 
-## Demo Flow
+## Agent Flow
 
-1. User enters a natural language goal (e.g., "What does Milo need today?")
-2. Frontend displays Milo's pet profile
-3. Agent discovers available tools via `/api/tools`
-4. Agent executes tools in sequence:
-   - `get_pet_profile` → Get Milo's info
-   - `get_daily_needs` → Get care checklist
-   - `find_pet_services` → Find grooming services
-5. UI displays each tool call in real-time with status
-6. Agent synthesizes results into a care plan
-7. User can approve and save the plan via `save_care_plan`
+1. Open PawPilot in a browser with WebMCP support.
+2. The page registers all six tools with the browser's model context.
+3. A connected agent chooses and calls tools based on the user's request.
+4. PawPilot displays each incoming call and its status in real time.
+5. Read tools return pet context without side effects.
+6. The agent calls `save_care_plan` only after explicit user approval.
+7. Saved plans persist in Netlify Database and can be retrieved with `list_care_plans`.
 
 ## Troubleshooting
 
@@ -133,10 +135,6 @@ rm -rf .next
 npm run dev
 ```
 
-## Next Steps
+## Data Storage
 
-- [ ] Integrate actual WebMCP client for agent communication
-- [ ] Add database for persistent storage
-- [ ] Implement user authentication
-- [ ] Add real veterinary service integrations
-- [ ] Deploy to production environment
+Care plans use Netlify Database with the schema in `db/schema.ts`. Migrations in `netlify/database/migrations/` are applied automatically during deploy.
