@@ -1,20 +1,24 @@
-import { executeTool } from '../../server/tools.js';
+import { executeTool, ToolInputError } from '../../server/tools.js';
 
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
-    try {
-      const { tool, params } = req.body;
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ success: false, error: 'Method not allowed' });
+  }
 
-      if (!tool || !params) {
-        return res.status(400).json({ error: 'Missing tool or params' });
-      }
+  try {
+    const body = req.body || {};
+    const tool = body.tool || body.name;
+    const params = body.params ?? body.arguments ?? body.input ?? {};
 
-      const result = await executeTool(tool, params);
-      res.status(200).json(result);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+    if (typeof tool !== 'string') {
+      return res.status(400).json({ success: false, error: 'tool is required' });
     }
-  } else {
-    res.status(405).json({ error: 'Method not allowed' });
+
+    const result = await executeTool(tool, params);
+    return res.status(result.success ? 200 : 404).json(result);
+  } catch (error) {
+    const status = error instanceof ToolInputError ? 400 : 500;
+    return res.status(status).json({ success: false, error: error.message });
   }
 }
