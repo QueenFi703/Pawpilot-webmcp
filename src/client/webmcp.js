@@ -1,13 +1,8 @@
 import { normalizeToolParams } from '../shared/tool-input.js';
 
 const toToolResult = (data) => ({
-  content: [
-    {
-      type: 'text',
-      text: JSON.stringify(data)
-    }
-  ],
-  structuredContent: data
+  content: [{ type: 'text', text: JSON.stringify(data) }],
+  structuredContent: data,
 });
 
 const getModelContext = () => {
@@ -17,14 +12,10 @@ const getModelContext = () => {
 
 export async function registerPawpilotTools(onActivity) {
   const modelContext = getModelContext();
-
-  if (!modelContext?.registerTool) {
-    return { status: 'unavailable', registered: [], cleanup: () => {} };
-  }
+  if (!modelContext?.registerTool) return { status: 'unavailable', registered: [], cleanup: () => {} };
 
   const response = await fetch('/api/tools');
   if (!response.ok) throw new Error('Could not load PawPilot tools');
-
   const { tools } = await response.json();
   const registered = [];
 
@@ -40,29 +31,27 @@ export async function registerPawpilotTools(onActivity) {
         onActivity?.({ callId, name: tool.name, status: 'running', params });
 
         try {
+          if (tool.name === 'save_care_plan' && params?.confirmed !== true) {
+            const result = { success: false, requiresConfirmation: true, error: 'Human confirmation is required before saving a care plan.' };
+            onActivity?.({ callId, name: tool.name, status: 'failed', error: result.error });
+            return toToolResult(result);
+          }
+
           const executeResponse = await fetch('/api/execute', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tool: tool.name, params })
+            body: JSON.stringify({ tool: tool.name, params }),
           });
           const result = await executeResponse.json();
+          if (!executeResponse.ok || !result.success) throw new Error(result.error || `Tool ${tool.name} failed`);
 
-          if (!executeResponse.ok || !result.success) {
-            throw new Error(result.error || `Tool ${tool.name} failed`);
-          }
-
-          onActivity?.({
-            callId,
-            name: tool.name,
-            status: 'completed',
-            result: result.data
-          });
-          return toToolResult(result.data);
+          onActivity?.({ callId, name: tool.name, status: 'completed', result: result.data });
+          return toToolResult(result);
         } catch (error) {
           onActivity?.({ callId, name: tool.name, status: 'failed', error: error.message });
           throw error;
         }
-      }
+      },
     });
     registered.push(tool.name);
   }
@@ -73,6 +62,6 @@ export async function registerPawpilotTools(onActivity) {
     cleanup: () => {
       if (!modelContext.unregisterTool) return;
       registered.forEach((name) => modelContext.unregisterTool(name));
-    }
+    },
   };
 }
