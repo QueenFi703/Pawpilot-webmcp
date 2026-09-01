@@ -5,15 +5,17 @@ The natural-language chat uses the OpenAI Responses API from the Next.js server 
 ## Required environment variables
 
 ```text
-OPENAI_API_KEY=<your project API key>
+OPENAI_API_KEY_PawPilot=<your project API key>
 OPENAI_MODEL=gpt-5.6-luna
 ```
 
-For Netlify, add both variables under the site's environment variables, then redeploy the `feat/natural-language-agent-layer` branch (or merge the PR into the production branch).
+For Netlify, add these variables under the site's environment variables with **Functions** access and enable them for the deploy contexts you use (including **Deploy Previews** when testing a PR). Then redeploy the site so the server-side function receives the updated values.
 
 ## Security
 
 Do not use `NEXT_PUBLIC_OPENAI_API_KEY`. OpenAI API keys must remain server-side. The client calls `/api/agent`; that route calls the OpenAI Responses API and executes PawPilot's local tools.
+
+Do not commit `.env` files or real API keys. The repository `.gitignore` excludes local `.env` files, and `.env.example` contains placeholders only.
 
 ## Architecture
 
