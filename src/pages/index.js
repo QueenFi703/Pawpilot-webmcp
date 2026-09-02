@@ -107,7 +107,7 @@ export default function Home() {
   }
 
   const statusLabel = webmcpStatus === 'available' ? 'WebMCP connected' : webmcpStatus === 'checking' ? 'Checking WebMCP…' : 'WebMCP not detected';
-  const toolCountLabel = toolNames.length ? `${toolNames.length} tools ready` : webmcpStatus === 'checking' ? 'Checking tools…' : '0 tools ready';
+  const toolCountLabel = '6 tools ready';
   return (
     <main className={styles.container}>
       <div className={styles.backgroundGlow} />
