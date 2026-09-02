@@ -2,7 +2,7 @@
 
 PawPilot is an agent-callable pet care workspace built with WebMCP, Next.js, and Netlify. It exposes structured tools for Dojo’s profile, daily care, services, products, and saved care plans while keeping write actions explicit and observable in the interface.
 
-The application is designed for Microsoft Edge’s WebMCP implementation. It also exposes the same tools through HTTP endpoints for debugging and non-browser integrations.
+PawPilot has been tested with WebMCP in both Microsoft Edge and Google Chrome. In both supported test environments, the browser exposes PawPilot’s registered tools and the tools can be discovered and called through `document.modelContext`, including real tool execution through `executeTool()`.
 
 ## What It Does
 
@@ -24,11 +24,11 @@ The application is designed for Microsoft Edge’s WebMCP implementation. It als
 | `save_care_plan` | Persists a user-approved care plan | `plan`, `confirmed`, `approvalToken` |
 | `list_care_plans` | Lists Dojo’s saved plans newest first | None |
 
-Pet-context tools default to `dojo-001`. `get_daily_needs` defaults to today, so an Edge invocation with `{}` remains valid.
+Pet-context tools default to `dojo-001`. `get_daily_needs` defaults to today, so an Edge or Chrome invocation with `{}` remains valid.
 
-## Using WebMCP in Edge
+## Using WebMCP in Edge or Chrome
 
-Open the deployed site in a Microsoft Edge environment with WebMCP support. PawPilot registers its tools when the page loads.
+Open the deployed site in a WebMCP-enabled Microsoft Edge or Google Chrome environment. PawPilot registers its six tools when the page loads.
 
 You can inspect the registered catalog from DevTools:
 
@@ -37,7 +37,7 @@ const tools = await document.modelContext.getTools();
 console.table(tools.map(({ name, description }) => ({ name, description })));
 ```
 
-An empty daily-needs invocation is supported:
+You can also execute a discovered tool directly:
 
 ```javascript
 const tools = await document.modelContext.getTools();
@@ -45,7 +45,7 @@ const dailyNeeds = tools.find((tool) => tool.name === 'get_daily_needs');
 await document.modelContext.executeTool(dailyNeeds, '{}');
 ```
 
-The request is normalized to include Dojo’s ID and the current local date before it reaches the tool implementation.
+PawPilot normalizes the request to include Dojo’s ID and the current local date before it reaches the tool implementation. The project has been tested through actual WebMCP discovery and execution rather than only checking whether `modelContext` exists.
 
 ## HTTP API
 
@@ -148,6 +148,8 @@ npm run check
 ```
 
 This runs linting, the Node test suite, and the production build.
+
+WebMCP was also tested in Microsoft Edge and Google Chrome with the WebMCP capability enabled. The test confirmed that PawPilot’s six tools are exposed through `document.modelContext`, discoverable with `getTools()`, and callable with `executeTool()`.
 
 ## Demo Data
 
