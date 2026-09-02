@@ -5,7 +5,7 @@ const TOKEN_TTL_SECONDS = 5 * 60;
 const usedNonces = new Map();
 
 function getApprovalSecret() {
-  const secret = process.env.PAWPILOT_APPROVAL_SECRET || process.env.NEXTAUTH_SECRET || process.env.NETLIFY_DATABASE_URL;
+  const secret = process.env.PAWPILOT_APPROVAL_SECRET;
   if (!secret) throw new Error('PawPilot approval signing secret is not configured. Set PAWPILOT_APPROVAL_SECRET.');
   return secret;
 }
