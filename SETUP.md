@@ -42,14 +42,14 @@ npm run db:generate  # Generate a database migration
 
 ## WebMCP Checks
 
-In Microsoft Edge DevTools, confirm that the browser model context and tools are available:
+In a WebMCP-capable browser environment, confirm that the browser model context and tools are available:
 
 ```javascript
 typeof document.modelContext;
 await document.modelContext.getTools();
 ```
 
-Test the daily-needs tool with the empty argument shape produced by Edge:
+Test the daily-needs tool with the empty argument shape produced by the browser:
 
 ```javascript
 const tools = await document.modelContext.getTools();
@@ -57,7 +57,7 @@ const tool = tools.find((candidate) => candidate.name === 'get_daily_needs');
 await document.modelContext.executeTool(tool, '{}');
 ```
 
-PawPilot fills in `petId: "milo-001"` and the current date before calling `/api/execute`.
+PawPilot fills in `petId: "dojo-001"` and the current local date before calling `/api/execute`.
 
 ## API Checks
 
@@ -99,7 +99,7 @@ netlify dev --port 8889
 
 ### WebMCP tools are unavailable
 
-- Confirm the site is open in a Microsoft Edge environment with WebMCP support.
+- Confirm the site is open in a browser environment with WebMCP support.
 - Reload after opening DevTools or enabling the relevant browser capability.
 - Check `GET /api/tools` to separate browser registration issues from server tool issues.
 
