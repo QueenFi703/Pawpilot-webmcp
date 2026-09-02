@@ -19,9 +19,27 @@ export async function registerPawpilotTools(onActivity) {
   const payload = await response.json();
   const toolCatalog = Array.isArray(payload?.tools) ? payload.tools : [];
   const registered = [];
+  const registrationControllers = new Map();
+
+  const unregister = async (name) => {
+    const controller = registrationControllers.get(name);
+    if (controller) {
+      controller.abort();
+      registrationControllers.delete(name);
+    }
+
+    // Older browser implementations may expose unregisterTool instead of
+    // honoring the registration AbortSignal.
+    if (modelContext.unregisterTool) {
+      try { await modelContext.unregisterTool(name); } catch { /* best-effort cleanup */ }
+    }
+  };
 
   try {
     for (const tool of toolCatalog) {
+      const controller = new AbortController();
+      registrationControllers.set(tool.name, controller);
+
       await modelContext.registerTool({
         name: tool.name,
         title: tool.title || tool.name,
@@ -62,14 +80,12 @@ export async function registerPawpilotTools(onActivity) {
             throw error;
           }
         },
-      });
+      }, { signal: controller.signal });
       registered.push(tool.name);
     }
   } catch (error) {
-    if (modelContext.unregisterTool) {
-      for (const name of registered.reverse()) {
-        try { await modelContext.unregisterTool(name); } catch { /* best-effort rollback */ }
-      }
+    for (const name of registered.reverse()) {
+      await unregister(name);
     }
     throw error;
   }
@@ -78,9 +94,8 @@ export async function registerPawpilotTools(onActivity) {
     status: registered.length ? 'connected' : 'unavailable',
     registered,
     cleanup: async () => {
-      if (!modelContext.unregisterTool) return;
       for (const name of registered) {
-        try { await modelContext.unregisterTool(name); } catch { /* best-effort cleanup */ }
+        await unregister(name);
       }
     },
   };
