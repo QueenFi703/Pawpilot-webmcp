@@ -1,0 +1,32 @@
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 360px; max-width: 420px; background: #0b0d12; color: #f5f7fb; font: 14px -apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif; }
+.app { padding: 18px; }
+header { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.brand { display:flex; align-items:center; gap:10px; }
+.brand > span { font-size:25px; }
+.brand strong,.brand small { display:block; }
+.brand small { color:#9299a8; margin-top:2px; }
+.pill { padding:6px 9px; border-radius:999px; background:#173b2a; color:#83e6ad; font-size:11px; font-weight:700; }
+.hero { padding:24px 0 16px; }
+.eyebrow { color:#8e97a8; font-size:10px; letter-spacing:.14em; font-weight:700; }
+h1 { margin:7px 0 6px; font-size:28px; }
+.hero p { margin:0; color:#aab1bf; line-height:1.45; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.card { background:#151922; border:1px solid #252b37; border-radius:12px; padding:12px; }
+.card span { display:block; color:#8f97a7; font-size:11px; }
+.card strong { display:block; margin-top:5px; font-size:14px; }
+.actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:14px 0 20px; }
+.actions button:first-child { grid-column:1 / -1; }
+button { border:0; border-radius:10px; padding:10px 12px; cursor:pointer; background:#f5f7fb; color:#0b0d12; font-weight:700; }
+button.secondary { background:#1a1f29; color:#e9edf4; border:1px solid #2b3240; }
+.section-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+h2 { font-size:14px; margin:0; }
+.section-title span { color:#7f8797; font-size:11px; }
+.tools { display:grid; gap:8px; }
+.tool { background:#151922; border:1px solid #252b37; border-radius:10px; padding:10px; }
+.tool-head { display:flex; justify-content:space-between; gap:8px; }
+.tool-head span { font-size:9px; color:#8f97a7; }
+.tool p { color:#aeb5c1; line-height:1.35; margin:6px 0 9px; font-size:12px; }
+.tool-execute { width:100%; padding:8px; background:#202633; color:#fff; border:1px solid #303848; font-size:12px; }
+.empty { color:#858d9d; background:#11151c; border:1px dashed #2b3240; border-radius:10px; padding:14px; line-height:1.4; }
+footer { margin-top:16px; color:#687181; font-size:10px; line-height:1.4; }
