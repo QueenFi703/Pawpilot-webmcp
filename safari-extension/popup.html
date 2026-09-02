@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PawPilot WebMCP</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="brand"><span>🐾</span><div><strong>PawPilot</strong><small>WebMCP Bridge</small></div></div>
+      <span id="bridge-status" class="pill">Checking…</span>
+    </header>
+
+    <section class="hero">
+      <span class="eyebrow">SAFARI DEVELOPER CONSOLE</span>
+      <h1>WebMCP Bridge</h1>
+      <p id="page-title">Inspect the active page and test its WebMCP surface safely.</p>
+    </section>
+
+    <section class="grid">
+      <div class="card"><span>Runtime</span><strong id="runtime">—</strong></div>
+      <div class="card"><span>Native WebMCP</span><strong id="native">—</strong></div>
+      <div class="card"><span>Tools</span><strong id="tool-count">0</strong></div>
+      <div class="card"><span>Diagnostics</span><strong id="diagnostic">—</strong></div>
+    </section>
+
+    <div class="actions">
+      <button id="discover">Discover Tools</button>
+      <button id="console" class="secondary">Open Console</button>
+      <button id="export" class="secondary">Export Report</button>
+    </div>
+
+    <section>
+      <div class="section-title"><h2>Tools</h2><span id="tool-label">0 discovered</span></div>
+      <div id="tools" class="tools"><div class="empty">Click Discover Tools to inspect the page.</div></div>
+    </section>
+
+    <footer>Bridge mode never changes PawPilot's core WebMCP implementation.</footer>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
