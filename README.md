@@ -119,7 +119,7 @@ Netlify applies committed migrations during deployment.
 
 ```text
 db/                            Netlify Database schema and client
-netlify/database/migrations/   Generated Netlify Database migrations
+netlify/database/migrations/   Generated database migrations
 src/client/webmcp.js           Browser tool registration and invocation
 src/shared/tool-input.js       Shared argument parsing and defaults
 src/server/tools.js            Tool catalog, validation, and implementations
@@ -157,4 +157,4 @@ See `SETUP.md` for focused development and troubleshooting notes.
 
 ## License
 
-PawPilot is released under the MIT License. See [`LICENSE`](LICENSE).
+PawPilot is released under the MIT License. See `LICENSE`.
