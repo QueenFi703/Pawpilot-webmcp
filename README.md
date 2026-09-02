@@ -119,7 +119,7 @@ Netlify applies committed migrations during deployment.
 
 ```text
 db/                            Netlify Database schema and client
-netlify/database/migrations/   Generated database migrations
+netlify/database/migrations/   Generated Netlify Database migrations
 src/client/webmcp.js           Browser tool registration and invocation
 src/shared/tool-input.js       Shared argument parsing and defaults
 src/server/tools.js            Tool catalog, validation, and implementations
@@ -154,3 +154,7 @@ This runs linting, the Node test suite, and the production build.
 PawPilot currently uses a single sample pet, Dojo, plus sample service and product listings. Care plans are the only records persisted to Netlify Database.
 
 See `SETUP.md` for focused development and troubleshooting notes.
+
+## License
+
+PawPilot is released under the MIT License. See [`LICENSE`](LICENSE).
