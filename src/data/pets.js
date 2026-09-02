@@ -1,5 +1,5 @@
 // Demo pet data - Dojo's profile
-export const miloProfile = {
+export const dojoProfile = {
   id: 'dojo-001',
   name: 'Dojo',
   breed: 'Pitbull Terrier',
